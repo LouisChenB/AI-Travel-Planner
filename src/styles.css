@@ -64,3 +64,134 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
 /* 地图 */
 .map { width: 100%; height: 380px; border: 1px solid #edf0f7; border-radius: 12px; background: #fff; }
 h2, h3 { margin: 10px 0; }
+
+/* 美化行程管理查看面板 */
+.plan-view .plan-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.plan-view .summary-main {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 14px;
+  font-size: 12px;
+  background: #f2f4f7;
+  color: #333;
+  margin-right: 6px;
+}
+.badge-dest { background: #e8f3ff; color: #0b66c3; }
+.badge-budget { background: #fff4e5; color: #b86500; }
+.badge-created { background: #f3f6f4; color: #48624a; }
+.badge-estimate { background: #f0ecff; color: #5a41c5; }
+.badge-cost { background: #ffeef0; color: #b00020; }
+
+.plan-view .day-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin-top: 6px;
+}
+.image-thumb {
+  width: 100%;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid #e6e8eb;
+}
+.meal-row { margin: 6px 0; }
+.meal-name { font-weight: 500; margin-left: 6px; }
+.meal-address, .meal-intro, .sight-intro { font-size: 12px; color: #6b7280; }
+.sight-name { margin: 4px 0; }
+.tag {
+  font-size: 12px;
+  padding: 3px 6px;
+  border-radius: 12px;
+  background: #eef2f7;
+  color: #374151;
+}
+.tag-sightseeing { background: #e8f3ff; color: #0b66c3; }
+.tag-food { background: #fff5f0; color: #b93815; }
+.tag-shopping { background: #f1f5f9; color: #0f172a; }
+.tag-transport { background: #eef6ff; color: #0c4a6e; }
+.tag-hotel { background: #f5f3ff; color: #4c1d95; }
+.tag-other { background: #f3f4f6; color: #374151; }
+
+.panel-subtitle {
+  font-weight: 600;
+  margin: 8px 0;
+  color: #334155;
+}
+.tips ul {
+  margin: 0; padding-left: 18px;
+}
+
+/* 查看页：每天分块 + 活动小卡片 */
+.day-blocks { display: grid; gap: 16px; }
+.day-block {
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 12px;
+  padding: 14px 16px;
+  box-shadow: 0 2px 6px rgba(0,0,0,.04);
+}
+.day-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.day-title .day-index { font-weight: 600; margin-right: 8px; }
+.day-title .day-date { color: #666; font-size: 13px; }
+
+.activities { display: grid; gap: 10px; }
+.activity-card {
+  background: #fafafa;
+  border: 1px solid #f0f0f0;
+  border-radius: 10px;
+  padding: 10px 12px;
+  box-shadow: 0 1px 4px rgba(0,0,0,.03);
+}
+.activity-head {
+  display: grid;
+  grid-template-columns: 72px 72px 1fr auto;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.activity-head .time { font-weight: 600; }
+.activity-head .type {
+  color: #4b6bfb;
+  background: #eef2ff;
+  border-radius: 8px;
+  height: 24px;
+  padding: 0 8px;
+  display: inline-flex;
+  align-items: center;
+}
+.badge-cost { background: #fff4e6; color: #ad5700; border-radius: 8px; padding: 2px 6px; }
+
+.detail .kv { margin: 2px 0; }
+.detail .intro { color: #555; line-height: 1.5; margin-top: 4px; }
+.detail .steps { margin: 6px 0 0; padding-left: 18px; color: #444; }
+.flags .badge { margin-right: 6px; }
+
+.image-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+.image-thumb-wrap { display: flex; gap: 6px; align-items: center; }
+.image-thumb { width: 120px; height: 80px; object-fit: cover; border-radius: 8px; border: 1px solid #eee; }
+
+/* 编辑页：列宽与滚动 */
+.table-wrap { overflow-x: auto; }
+.table.fixed { table-layout: fixed; width: 100%; }
+.table.fixed th, .table.fixed td { padding: 8px; vertical-align: top; }
+.table.fixed input, .table.fixed select { width: 100%; }
+
+.col-time { width: 92px; }
+.col-title { width: 220px; }
+.col-type { width: 120px; }
+.col-details { width: 480px; }
+.col-notes { width: 180px; }
+.col-cost { width: 100px; }
+.col-actions { width: 86px; }

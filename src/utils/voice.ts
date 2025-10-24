@@ -149,7 +149,7 @@ async function transcribeWithXFYun(lang = 'zh-CN'): Promise<string> {
       let lastVoiceTs = Date.now()
       const PEAK_THRESHOLD = 0.02 // 峰值阈值，超过认为有语音
       const MAX_TALK_MS = 60_000   // 最长 1 分钟
-      const SILENCE_MS = 5_000     // 静音 5 秒结束
+      const SILENCE_MS = 3_000     // 静音 3 秒结束
 
       worklet.port.onmessage = (e: MessageEvent) => {
         const frame = e.data as Float32Array

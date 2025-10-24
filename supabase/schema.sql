@@ -24,6 +24,7 @@ create table if not exists public.expenses (
 alter table public.plans enable row level security;
 alter table public.expenses enable row level security;
 
+-- 已有的 select/insert 策略
 create policy "plans are viewable by owner" on public.plans
   for select using (auth.uid() = user_id);
 
@@ -35,3 +36,17 @@ create policy "expenses are viewable by owner" on public.expenses
 
 create policy "expenses are insertable by owner" on public.expenses
   for insert with check (auth.uid() = user_id);
+
+-- 新增：允许所有者更新与删除 plans
+create policy "plans are updatable by owner" on public.plans
+  for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+create policy "plans are deletable by owner" on public.plans
+  for delete using (auth.uid() = user_id);
+
+-- 新增：允许所有者更新与删除 expenses（若需要在管理页支持编辑/删除开销）
+create policy "expenses are updatable by owner" on public.expenses
+  for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+create policy "expenses are deletable by owner" on public.expenses
+  for delete using (auth.uid() = user_id);

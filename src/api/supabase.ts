@@ -106,3 +106,26 @@ export async function listExpenses(planId?: string) {
   if (error) throw error
   return data ?? []
 }
+
+// 新增：删除行程
+export async function deletePlan(id: string) {
+  const c = getClient()
+  const { error } = await c.from('plans').delete().eq('id', id)
+  if (error) throw error
+  console.log('deletePlan: 删除行程成功', id)
+}
+
+// 新增：更新行程（目的地 / 预算 / 内容）
+export async function updatePlan(
+  id: string,
+  updates: { destination?: string; plannedBudget?: number; content?: Itinerary }
+) {
+  const c = getClient()
+  const payload: any = {}
+  if (updates.destination !== undefined) payload.destination = updates.destination
+  if (updates.plannedBudget !== undefined) payload.planned_budget = updates.plannedBudget
+  if (updates.content !== undefined) payload.content = updates.content
+  const { data, error } = await c.from('plans').update(payload).eq('id', id).select().single()
+  if (error) throw error
+  return data
+}

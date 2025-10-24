@@ -1,12 +1,12 @@
 import { useMemo, useState } from 'react'
 import { transcribeOnce } from '../utils/voice'
 import { generateItinerary } from '../api/llm'
-import type { Itinerary, TripPreferences } from '../types'
+import type { Itinerary, TripPreferences, Activity } from '../types'
 import { savePlan } from '../api/supabase'
-import MapView from './MapView'
 
 export default function Planner() {
   const [destination, setDestination] = useState('中国 江苏 南京')
+  const [origin, setOrigin] = useState('')
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
   const [budget, setBudget] = useState(10000)
@@ -19,13 +19,26 @@ export default function Planner() {
 
   const prefs: TripPreferences = useMemo(() => ({
     destination,
+    origin,
     startDate,
     endDate,
     budget,
     people,
     interests: interests.split(',').map(s => s.trim()).filter(Boolean),
     withKids,
-  }), [destination, startDate, endDate, budget, people, interests, withKids])
+  }), [destination, origin, startDate, endDate, budget, people, interests, withKids])
+
+  // 活动类型中文标签
+  const typeLabel = (t: Activity['type'] | undefined) => {
+    switch (t) {
+      case 'sightseeing': return '景点'
+      case 'food': return '美食'
+      case 'shopping': return '购物'
+      case 'transport': return '交通'
+      case 'hotel': return '住宿'
+      default: return '其他'
+    }
+  }
 
   const speakFill = async () => {
     console.log('Planner: 开始语音识别填充偏好')
@@ -234,7 +247,11 @@ export default function Planner() {
             <label>目的地</label>
             <input value={destination} onChange={e => setDestination(e.target.value)} placeholder="例如：日本 东京" />
           </div>
-
+          <div className="row">
+            <label>出发地</label>
+            <input value={origin} onChange={e => setOrigin(e.target.value)} placeholder="例如：上海 / 北京 / 广州" />
+          </div>
+          {/* 其他偏好保持不变 */}
           <div className="row two-cols">
             <div className="col">
               <label>开始日期</label>
@@ -277,18 +294,40 @@ export default function Planner() {
       {itinerary && (
         <>
           <div className="panel">
-            <div className="panel-title">行程概览：{itinerary.destination}</div>
-            <div className="itinerary">
-              {itinerary.days?.map((d, i) => (
-                <div key={i} className="day">
-                  <div className="day-title">{d.date}</div>
-                  <ul>
-                    {d.activities?.map((a, j) => (
-                      <li key={j}>
-                        <span className="time">{a.time}</span>
-                        <span className="title">{a.title}</span>
-                        {a.address ? <span className="address">{a.address}</span> : null}
-                        {typeof a.costEstimate === 'number' ? <span className="cost">¥{a.costEstimate}</span> : null}
+            <div className="panel-title">智能行程结果（点击保存到云端后可前往行程管理页面查看详细信息）</div>
+
+            {/* 每天的住宿/餐饮/景点 + 时间线活动（含交通） */}
+            <div className="day-grid">
+              {itinerary.days.map((day, di) => (
+                <div key={di} className="day-card">
+                  <div className="day-header">
+                    <span className="day-index">Day {di + 1}</span>
+                    <span className="day-date">{day.date}</span>
+                  </div>
+
+                  {/* 原活动时间线（增强：显示 transport 详情） */}
+                  <ul className="activity-list">
+                    {(day.activities ?? []).map((a, ai) => (
+                      <li key={ai} className="activity-row">
+                        <span className="timeline-dot" />
+                        <span className="activity-time">{a.time}</span>
+                        <span className="activity-title">{a.title}</span>
+                        <span className={`tag tag-${a.type ?? 'other'}`}>{typeLabel(a.type)}</span>
+                        {'from' in a && 'to' in a && a.type === 'transport' ? (
+                          <>
+                            <div>{a.method}：{a.from} → {a.to}</div>
+                            {Array.isArray(a.steps) && a.steps.length > 0 ? <ul>{a.steps.map((s, i) => <li key={i}>{s}</li>)}</ul> : null}
+                            {a.departTime ? <span className="badge">出发 {a.departTime}</span> : null}
+                            {a.arriveTime ? <span className="badge">抵达 {a.arriveTime}</span> : null}
+                            {a.duration ? <span className="badge">时长 {a.duration}</span> : null}
+                            {typeof a.costEstimate === 'number' ? <span className="badge badge-cost">¥{a.costEstimate}</span> : null}
+                          </>
+                        ) : (
+                          <>
+                            {'address' in a && a.address ? <span className="activity-address">{a.address}</span> : null}
+                            {typeof a.costEstimate === 'number' ? <span className="badge badge-cost">¥{a.costEstimate}</span> : null}
+                          </>
+                        )}
                       </li>
                     ))}
                   </ul>
@@ -296,11 +335,15 @@ export default function Planner() {
               ))}
             </div>
           </div>
-
-          <div className="panel">
-            <div className="panel-title">地图</div>
-            <MapView itinerary={itinerary} />
-          </div>
+          {/* 提示与地图、其余保持不变 */}
+          {Array.isArray(itinerary.tips) && itinerary.tips.length > 0 ? (
+            <div className="tips">
+              <div className="panel-subtitle">小贴士</div>
+              <ul>
+                {itinerary.tips.map((t, i) => <li key={i}>{t}</li>)}
+              </ul>
+            </div>
+          ) : null}
         </>
       )}
     </div>

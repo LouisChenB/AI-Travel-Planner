@@ -46,7 +46,7 @@ export default function Settings() {
     <div className="page">
       <h2>设置</h2>
       <div className="form">
-        <h3>大模型（OpenAI 兼容）</h3>
+        <h3>大模型</h3>
         <label>Base URL</label>
         <input value={llmBaseUrl} onChange={e => setLlmBaseUrl(e.target.value)} placeholder="例如：https://api.openai.com" />
         <label>API Key</label>
@@ -58,7 +58,7 @@ export default function Settings() {
         <label>AMap Key</label>
         <input value={amapKey} onChange={e => setAmapKey(e.target.value)} placeholder="在高德控制台申请的 Web JS API Key" />
 
-        <h3>Supabase（认证与云端同步）</h3>
+        <h3>Supabase</h3>
         <label>Supabase URL</label>
         <input value={supabaseUrl} onChange={e => setSupabaseUrl(e.target.value)} placeholder="https://xxxxx.supabase.co" />
         <label>Supabase Anon Key</label>

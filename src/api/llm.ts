@@ -8,7 +8,7 @@ async function chat(messages: ChatMessage[]) {
   if (!s.llmBaseUrl || !s.llmApiKey || !s.llmModel) {
     throw new Error('请在设置页配置 LLM Base URL、API Key 和 Model')
   }
-  const resp = await fetch(`${s.llmBaseUrl.replace(/\/$/, '')}/v1/chat/completions`, {
+  const resp = await fetch(s.llmBaseUrl, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

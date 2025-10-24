@@ -79,7 +79,7 @@ export default function Planner() {
           /带孩子/,
           /[一二两三四五六七八九十\d]+个?人/,
           /\d+天/,
-          /(\d{2,4})?年?\d{1,2}月\d{1,2}(日|号)?/
+          /(\d{2,4})?年?\d{1,2}月\d{1,2}(?:日|号)?/
         ]
         let cut = rest.length
         for (const re of boundaryRegs) {
@@ -96,7 +96,8 @@ export default function Planner() {
 
       // 日期范围：支持 “YYYY年MM月DD日 至/到/~/-/— YYYY年MM月DD日”，年份可省略或用两位数；跨年自动推断
       // 通用匹配：两端的年份均为可选
-      const reRange = /(?:(\d{2,4})年)?(\d{1,2})月(\d{1,2})日?(?:至|~|到|—|-)(?:(\d{2,4})年)?(\d{1,2})月(\d{1,2})日?/
+      // 日期范围：支持“日/号”
+      const reRange = /(?:(\d{2,4})年)?(\d{1,2})月(\d{1,2})(?:日|号)?(?:至|~|到|—|-)(?:(\d{2,4})年)?(\d{1,2})月(\d{1,2})(?:日|号)?/
       const mRange = textNorm.match(reRange)
       if (mRange) {
         const y1 = normalizeYear(mRange[1], currentYear)

@@ -41,9 +41,9 @@ export async function generateItinerary(prefs: TripPreferences): Promise<Itinera
       "date": "2025-10-01",
       "activities": [
         { "time": "08:00", "title": "抵达南京", "type": "transport", "from": "上海", "to": "南京", "method": "高铁", "fromLat": 31.2304, "fromLng": 121.4737, "toLat": 32.0603, "toLng": 118.7969, "departTime": "08:00", "arriveTime": "09:30", "steps": ["步行至地铁站","乘坐地铁至虹桥火车站","乘坐Gxxx高铁至南京南"], "duration": "1.5h", "costEstimate": 150, "isArrival": true },
-        { "time": "09:45", "title": "早餐 · 鸭血粉丝汤", "type": "food", "name": "鸭血粉丝汤（某店）", "address": "南京市xx区xx路", "imageUrl": "https://example.com/restaurant.jpg", "costEstimate": 30 },
+        { "time": "09:45", "title": "早餐 · 鸭血粉丝汤", "type": "food", "name": "鸭血粉丝汤（某店）", "address": "南京市xx区xx路", "costEstimate": 30 },
         { "time": "10:30", "title": "前往中山陵", "type": "transport", "from": "早餐店", "to": "中山陵", "method": "地铁+步行", "fromLat": 32.0500, "fromLng": 118.7800, "toLat": 32.0608, "toLng": 118.8489, "steps": ["步行至地铁站","乘坐x号线至xx站","步行至中山陵"], "duration": "40min", "costEstimate": 8 },
-        { "time": "11:20", "title": "游览 · 中山陵", "type": "sightseeing", "name": "中山陵", "address": "南京市玄武区紫金山南麓", "intro": "中国近代伟人孙中山先生的陵寝", "imageUrls": ["https://example.com/sight1.jpg","https://example.com/sight2.jpg"], "costEstimate": 0 },
+        { "time": "11:20", "title": "游览 · 中山陵", "type": "sightseeing", "name": "中山陵", "address": "南京市玄武区紫金山南麓", "intro": "中国近代伟人孙中山先生的陵寝", "costEstimate": 0 },
         { "time": "18:00", "title": "返程 · 回上海", "type": "transport", "from": "南京", "to": "上海", "method": "高铁", "fromLat": 32.0603, "fromLng": 118.7969, "toLat": 31.2304, "toLng": 121.4737, "departTime": "18:00", "arriveTime": "19:30", "steps": ["抵达南京南","乘坐Gxxx高铁至上海虹桥"], "duration": "1.5h", "costEstimate": 150, "isDeparture": true }
       ]
     }
@@ -60,27 +60,23 @@ export async function generateItinerary(prefs: TripPreferences): Promise<Itinera
 - 活动（Activity 联合类型）：
   - 通用：time（HH:mm）、title（字符串）、type（枚举：transport|sightseeing|food|shopping|hotel|other）、notes（可选）、costEstimate（数字）。
   - transport：from、to、method、fromLat（数字）、fromLng（数字）、toLat（数字）、toLng（数字）、steps（字符串数组，可选）、duration（字符串）、departTime/arriveTime（字符串）、isArrival/isDeparture（布尔）。必须提供经纬度，地图导航仅使用坐标。
-  - sightseeing：name、address、lat/lng（数字）、intro（景点介绍）、imageUrls（2–4 张图片）。
-  - food：name、address、lat/lng（数字）、intro（美食/餐厅介绍）、imageUrl（图片）。
-  - shopping：name、address、lat/lng（数字）、intro（购物地点介绍）、imageUrl（图片）。
-  - hotel：name、address、lat/lng（数字）、breakfastIncluded（布尔）、imageUrl（图片）。
-  - other：name/address/intro/imageUrl。
-
-图片约束（务必遵守）：
-- 图片选择请优先参考百度图片（https://image.baidu.com/）的检索结果所指向的“来源页面”，从来源页面挑选可公开访问的图片。
-- 返回可公开访问的 HTTPS 图片直链（以 .jpg/.jpeg/.png/.webp 结尾）或可靠来源页面链接（如百度百科、景点/餐厅官网）；不要返回需登录或带防盗链的链接，不要返回百度图片的中转/缩略图地址。
+  - sightseeing：name、address、lat/lng（数字，可选）、intro（景点介绍）。
+  - food：name、address、lat/lng（数字，可选）、intro（美食/餐厅介绍）。
+  - shopping：name、address、lat/lng（数字，可选）、intro（购物地点介绍）。
+  - hotel：name、address、lat/lng（数字，可选）、breakfastIncluded（布尔）。
+  - other：name/address/intro。
 
 约束与规则：
 - 每个活动必须包含 time（HH:mm）、title、type、costEstimate（数字，估算费用），各个活动按时间顺序排列。
 - 首日以“抵达”的 transport 开场（from=出发地，to=目的地）；末日以“返程”的 transport 结束（from=目的地，to=出发地）。
 - 餐饮/景点之间的移动用 transport 活动表示。
-- transport 活动必须提供 fromLat/fromLng/toLat/toLng，经纬度将用于地图导航。
+- transport 活动必须提供 fromLat/fromLng/toLat/toLng，并与 from/to 一致，导航仅使用这些坐标。
 - 只返回上述 JSON，不要返回任何额外文本或 Markdown。`,
   }
   const user: ChatMessage = {
     role: 'user',
     content: `
-请根据以下偏好生成每日按时间排序的活动序列（交通也作为活动），并为酒店/餐厅/景点提供图片：
+请根据以下偏好生成每日按时间排序的活动序列（交通也作为活动）：
 - 出发地：${prefs.origin || '未指定'}
 - 目的地：${prefs.destination}
 - 开始日期：${prefs.startDate || '未指定'}
@@ -89,8 +85,6 @@ export async function generateItinerary(prefs: TripPreferences): Promise<Itinera
 - 人数：${prefs.people}
 - 偏好：${(prefs.interests || []).join('，')}
 - 是否带孩子：${prefs.withKids ? '是' : '否'}
-
-图片选择：请在百度图片（https://image.baidu.com/）检索后，优先返回可公开访问的 HTTPS 图片直链（.jpg/.jpeg/.png/.webp），不要返回需要登录或带防盗链的链接，不要使用缩略图或中转链接。
 
 请严格按系统消息中的 JSON 格式与字段约定返回内容；所有活动必须包含 time，transport 活动必须包含 fromLat/fromLng/toLat/toLng 并与 from/to 一致，导航仅使用这些坐标。`.trim(),
   }

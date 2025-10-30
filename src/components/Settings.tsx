@@ -7,6 +7,7 @@ export default function Settings() {
   const [llmApiKey, setLlmApiKey] = useState('')
   const [llmModel, setLlmModel] = useState('')
   const [amapKey, setAmapKey] = useState('')
+  const [amapSecurityJsCode, setAmapSecurityJsCode] = useState('')
   const [supabaseUrl, setSupabaseUrl] = useState('')
   const [supabaseAnonKey, setSupabaseAnonKey] = useState('')
   // 新增：科大讯飞
@@ -21,6 +22,7 @@ export default function Settings() {
     setLlmApiKey(s.llmApiKey ?? '')
     setLlmModel(s.llmModel ?? '')
     setAmapKey(s.amapKey ?? '')
+    setAmapSecurityJsCode(s.amapSecurityJsCode ?? '')
     setSupabaseUrl(s.supabaseUrl ?? '')
     setSupabaseAnonKey(s.supabaseAnonKey ?? '')
     setXfyAppId(s.xfyAppId ?? '')
@@ -32,7 +34,8 @@ export default function Settings() {
     console.log('Settings: 保存设置')
     setSettings({
       llmBaseUrl, llmApiKey, llmModel,
-      amapKey, supabaseUrl, supabaseAnonKey,
+      amapKey, amapSecurityJsCode,
+      supabaseUrl, supabaseAnonKey,
       xfyAppId, xfyApiKey, xfyApiSecret,
     })
     if (supabaseUrl && supabaseAnonKey) {
@@ -57,6 +60,8 @@ export default function Settings() {
         <h3>地图（高德）</h3>
         <label>AMap Key</label>
         <input value={amapKey} onChange={e => setAmapKey(e.target.value)} placeholder="在高德控制台申请的 Web JS API Key" />
+        <label>AMap Security JS Code</label>
+        <input value={amapSecurityJsCode} onChange={e => setAmapSecurityJsCode(e.target.value)} placeholder="在高德控制台申请的 Web JS API Security JS Code" />
 
         <h3>Supabase</h3>
         <label>Supabase URL</label>

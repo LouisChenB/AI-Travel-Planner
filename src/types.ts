@@ -43,7 +43,6 @@ export type SightseeingActivity = ActivityBase & {
   lat?: number
   lng?: number
   intro?: string
-  imageUrls?: string[]
 }
 
 // 餐饮
@@ -54,7 +53,6 @@ export type FoodActivity = ActivityBase & {
   lat?: number
   lng?: number
   intro?: string
-  imageUrl?: string
 }
 
 // 购物
@@ -65,7 +63,6 @@ export type ShoppingActivity = ActivityBase & {
   lat?: number
   lng?: number
   intro?: string
-  imageUrl?: string
 }
 
 // 酒店
@@ -76,7 +73,6 @@ export type HotelActivity = ActivityBase & {
   lat?: number
   lng?: number
   breakfastIncluded?: boolean
-  imageUrl?: string
 }
 
 // 其他
@@ -87,7 +83,6 @@ export type OtherActivity = ActivityBase & {
   lat?: number
   lng?: number
   intro?: string
-  imageUrl?: string
 }
 
 export type Activity =
@@ -135,6 +130,7 @@ export type Settings = {
   llmApiKey?: string
   llmModel?: string
   amapKey?: string
+  amapSecurityJsCode?: string
   supabaseUrl?: string
   supabaseAnonKey?: string
   // 新增：科大讯飞语音识别所需

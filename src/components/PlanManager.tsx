@@ -400,7 +400,7 @@ export default function PlanManager() {
                       {/* 在 transport 活动之后增加地图导航 */}
                       {a.type === 'transport' ? (
                         <div style={{ marginTop: 8 }}>
-                          <MapView activity={a} />
+                          <MapView activity={a} height={500} />
                         </div>
                       ) : null}
 

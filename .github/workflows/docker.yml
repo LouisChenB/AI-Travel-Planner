@@ -16,6 +16,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Set lowercase repo
+        run: echo "REPO_LC=${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -30,11 +33,12 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
+          file: ./dockerfile
           platforms: linux/amd64
           push: true
           tags: |
-            ghcr.io/louischen/ai-travel-planner:latest
-            ghcr.io/louischen/ai-travel-planner:${{ github.sha }}
+            ghcr.io/${{ env.REPO_LC }}:latest
+            ghcr.io/${{ env.REPO_LC }}:${{ github.sha }}
           # 如需传入 Vite 构建期变量，取消注释并填好值或用仓库/环境 secrets
           # build-args: |
           #   VITE_SUPABASE_URL=${{ secrets.VITE_SUPABASE_URL }}
@@ -44,6 +48,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
+          file: ./dockerfile
           platforms: linux/amd64
           load: true
           tags: ai-travel-planner:local

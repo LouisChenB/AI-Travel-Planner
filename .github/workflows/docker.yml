@@ -1,0 +1,68 @@
+name: Build & Publish Docker
+
+on:
+  push:
+    branches: [ "main" ]
+    tags: [ "v*" ]
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build & Push to GHCR
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: linux/amd64
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}:latest
+            ghcr.io/${{ github.repository }}:${{ github.sha }}
+          # 如需传入 Vite 构建期变量，取消注释并填好值或用仓库/环境 secrets
+          # build-args: |
+          #   VITE_SUPABASE_URL=${{ secrets.VITE_SUPABASE_URL }}
+          #   VITE_SUPABASE_ANON_KEY=${{ secrets.VITE_SUPABASE_ANON_KEY }}
+
+      - name: Build (load) for tar
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: linux/amd64
+          load: true
+          tags: ai-travel-planner:local
+
+      - name: Save image to tar
+        run: docker save -o ai-travel-planner.tar ai-travel-planner:local
+
+      - name: Upload tar as workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ai-travel-planner-image
+          path: ai-travel-planner.tar
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Publish Release with tar (only on tag)
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v1
+        with:
+          files: ai-travel-planner.tar
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { Activity } from '../types'
 import { getSettings } from '../storage/settings'
 
@@ -9,6 +9,7 @@ declare global {
 export default function MapView({ activity, height = 500 }: { activity: Activity; height?: number }) {
   const mapRef = useRef<HTMLDivElement | null>(null)
   const mapObjRef = useRef<any>(null)
+  const [isVisible, setIsVisible] = useState(false)
 
   const loadScript = (key: string, securityJsCode: string) => {
     return new Promise<void>((resolve, reject) => {
@@ -32,7 +33,35 @@ export default function MapView({ activity, height = 500 }: { activity: Activity
     return 'Driving'
   }
 
+  // 仅当进入视窗时才标记为可见，触发地图初始化
   useEffect(() => {
+    const el = mapRef.current
+    if (!el) return
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) setIsVisible(true)
+        })
+      },
+      { root: null, threshold: 0.1 }
+    )
+    io.observe(el)
+    return () => io.disconnect()
+  }, [])
+
+  // 卸载时销毁地图，释放资源
+  useEffect(() => {
+    return () => {
+      if (mapObjRef.current && typeof mapObjRef.current.destroy === 'function') {
+        try { mapObjRef.current.destroy() } catch {}
+        mapObjRef.current = null
+      }
+    }
+  }, [])
+
+  useEffect(() => {
+    // 未进入视窗或非交通活动，不加载地图
+    if (!isVisible) return
     if (activity.type !== 'transport') return
 
     const s = getSettings()
@@ -43,7 +72,10 @@ export default function MapView({ activity, height = 500 }: { activity: Activity
     loadScript(key, securityJsCode).then(async () => {
       if (!mapRef.current) return
       const AMap = window.AMap
-      mapObjRef.current = new AMap.Map(mapRef.current, { zoom: 12 })
+      // 仅初始化一次
+      if (!mapObjRef.current) {
+        mapObjRef.current = new AMap.Map(mapRef.current, { zoom: 12 })
+      }
       const map = mapObjRef.current
 
       const fromLat = (activity as any).fromLat
@@ -51,7 +83,6 @@ export default function MapView({ activity, height = 500 }: { activity: Activity
       const toLat = (activity as any).toLat
       const toLng = (activity as any).toLng
 
-      // 仅使用经纬度导航：坐标缺失则不渲染导航
       if (
         typeof fromLat !== 'number' || typeof fromLng !== 'number' ||
         typeof toLat !== 'number' || typeof toLng !== 'number'
@@ -66,12 +97,15 @@ export default function MapView({ activity, height = 500 }: { activity: Activity
         const mode = pickRouteMode((activity as any).method)
         console.log('[MapView] 导航模式', mode, (activity as any).from, (activity as any).fromLat, (activity as any).fromLng, (activity as any).to, (activity as any).toLat, (activity as any).toLng, (activity as any).method)
 
-        // 统一加载相关插件，避免未加载导致构造报错
+        // 每次重绘前清空覆盖物，避免重复叠加
+        if (map && typeof map.clearMap === 'function') {
+          map.clearMap()
+        }
+
         AMap.plugin(['AMap.Driving', 'AMap.Walking', 'AMap.Transfer'], () => {
           try {
             if (!map || typeof map.getZoom !== 'function') {
               console.warn('Map 未正确初始化')
-              // 仅标注起终点，避免插件错误
               const startMarker = new AMap.Marker({ position: fromLoc, title: '起点' })
               const endMarker = new AMap.Marker({ position: toLoc, title: '终点' })
               map.add([startMarker, endMarker])
@@ -86,12 +120,10 @@ export default function MapView({ activity, height = 500 }: { activity: Activity
               const walking = new AMap.Walking({ map })
               walking.search(fromLoc, toLoc)
             } else {
-              // Transfer 对城市依赖较强，提供 map 即可让其推断；若失败会进入 catch
               const transfer = new AMap.Transfer({ map })
               transfer.search(fromLoc, toLoc)
             }
 
-            // 起终点标注
             const startMarker = new AMap.Marker({ position: fromLoc, title: '起点' })
             const endMarker = new AMap.Marker({ position: toLoc, title: '终点' })
             map.add([startMarker, endMarker])
@@ -113,7 +145,7 @@ export default function MapView({ activity, height = 500 }: { activity: Activity
     }).catch(err => {
       console.error(err)
     })
-  }, [activity, height])
+  }, [activity, height, isVisible])
 
   return <div ref={mapRef} className="map" style={{ height, width: '100%', borderRadius: 8 }} />
 }

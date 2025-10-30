@@ -114,18 +114,18 @@ export default function PlanManager() {
     const newDay: DayPlan = { date: '', activities: [] }
     setEditItinerary({ ...editItinerary, days: [...editItinerary.days, newDay] })
   }
-  const removeDay = (idx: number) => {
-    if (!editItinerary) return
-    const days = editItinerary.days.slice()
-    days.splice(idx, 1)
-    setEditItinerary({ ...editItinerary, days })
-  }
-  const setDayDate = (idx: number, date: string) => {
-    if (!editItinerary) return
-    const days = editItinerary.days.slice()
-    days[idx] = { ...days[idx], date }
-    setEditItinerary({ ...editItinerary, days })
-  }
+  // const removeDay = (idx: number) => {
+  //   if (!editItinerary) return
+  //   const days = editItinerary.days.slice()
+  //   days.splice(idx, 1)
+  //   setEditItinerary({ ...editItinerary, days })
+  // }
+  // const setDayDate = (idx: number, date: string) => {
+  //   if (!editItinerary) return
+  //   const days = editItinerary.days.slice()
+  //   days[idx] = { ...days[idx], date }
+  //   setEditItinerary({ ...editItinerary, days })
+  // }
 
   // 活动列表操作
   const addActivity = (dayIdx: number) => {
